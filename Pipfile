@@ -5,7 +5,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-urllib3 = ">=1.26.5"
+urllib3 = ">=2.0.0"
 
 lxml = "*"
 requests = "*"
@@ -15,4 +15,4 @@ requests = "*"
 
 [requires]
 
-python_version = "3.6"
+python_version = "3.14"
