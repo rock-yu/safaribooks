@@ -43,17 +43,16 @@ Books/                  # Output directory for downloaded EPUBs
 
 | Package | Role | Current lock |
 |---|---|---|
-| `requests` | HTTP client | 2.27.1 |
-| `lxml` | HTML/XML parse + EPUB build | 5.4.0 |
-| `urllib3` | Transitive via requests; pinned directly in Pipfile | 1.26.20 |
-| `certifi` | CA bundle (transitive) | 2025.4.26 |
-| `charset-normalizer` | Encoding detection (transitive) | 2.0.12 |
-| `idna` | Internationalised domain names (transitive) | 3.10 |
+| `requests` | HTTP client | 2.34.2 |
+| `lxml` | HTML/XML parse + EPUB build | 6.1.1 |
+| `urllib3` | Pinned directly in Pipfile; transitively used by requests | 2.7.0 |
+| `certifi` | CA bundle (transitive) | 2026.4.22 |
+| `charset-normalizer` | Encoding detection (transitive) | 3.4.7 |
+| `idna` | Internationalised domain names (transitive) | 3.15 |
 
 ## Python version
 
-- **Declared**: Python 3.6 (Pipfile + Pipfile.lock `_meta`)
-- **Runtime**: Any modern `python3` works at the script level — 3.6 is EOL
+- **Declared**: Python 3.14 (Pipfile + Pipfile.lock `_meta`)
 
 ---
 
@@ -77,9 +76,36 @@ python3 safaribooks.py --help
 
 ---
 
-## Active work
+## Working with plans
 
-See [`UPGRADE.md`](./UPGRADE.md) for the in-progress Python stack upgrade plan and checklist.
+All plans live in the [`plans/`](./plans/) directory. Plans are numbered sequentially with a zero-padded prefix (e.g. `001-`, `002-`).
+
+### Agent instructions
+
+1. **Always check for open plans first.** Before starting any new work, scan `plans/` for plan files whose checklist contains unchecked items (`- [ ]`). Resume the oldest incomplete plan before creating a new one.
+
+   ```bash
+   grep -rl "- \[ \]" plans/
+   ```
+
+2. **Creating a new plan.** Determine the next sequence number (`ls plans/ | sort | tail -1`), then create the file as `plans/NNN-short-description.md`. Follow this template:
+
+   ```markdown
+   # <Title>
+
+   ## Goal
+   <One-paragraph description of what this plan achieves and why.>
+
+   ## Checklist
+   - [ ] Step one
+   - [ ] Step two
+   ...
+
+   ## Notes
+   <Risks, decisions, context.>
+   ```
+
+3. **Tick items as you complete them** — change `- [ ]` to `- [x]` in the plan file and commit the update alongside the work.
 
 ---
 
