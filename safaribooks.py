@@ -538,10 +538,23 @@ class SafariBooks:
 
         if response.status_code == 404:
             self.display.info("v1 API returned 404, falling back to v2 API (newer ISBN format)...")
-            response = self.requests_provider(self.API_V2_TEMPLATE.format(self.book_id))
+            response = self.requests_provider(
+                self.API_V2_TEMPLATE.format(self.book_id),
+                headers={"Accept": "application/json"}
+            )
             if response == 0:
                 self.display.exit("API: unable to retrieve book info.")
             self.api_version = 2
+
+        if response.status_code != 200:
+            try:
+                body = response.json()
+                detail = body.get("detail", response.text[:120])
+            except Exception:
+                detail = response.text[:120]
+            self.display.exit(
+                "API: book info request failed (HTTP %d): %s" % (response.status_code, detail)
+            )
 
         response = response.json()
         if not isinstance(response, dict) or len(response.keys()) == 1:
@@ -605,7 +618,7 @@ class SafariBooks:
     def _get_book_chapters_v2(self):
         toc_url = self.book_info.get("_v2_toc_url") or \
                   self.API_V2_TEMPLATE.format(self.book_id) + "table-of-contents/"
-        response = self.requests_provider(toc_url)
+        response = self.requests_provider(toc_url, headers={"Accept": "application/json"})
         if response == 0:
             self.display.exit("API: unable to retrieve book chapters (v2 TOC).")
 
