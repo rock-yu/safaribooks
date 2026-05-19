@@ -659,8 +659,9 @@ class SafariBooks:
                 if r != 0 and r.status_code == 200:
                     assets = r.json().get("related_assets", {})
                     stylesheets = [{"url": u} for u in assets.get("stylesheets", [])]
-                    # Store just the filename so asset_base_url + '/' + name works
-                    images = [u.split("/")[-1] for u in assets.get("images", [])]
+                    # Keep path relative to /files/ so asset_base_url + '/' + path resolves correctly
+                    # e.g. 'assets/image.png' → base/files/assets/image.png
+                    images = [u.split("/files/")[-1] for u in assets.get("images", [])]
 
             chapters.append({
                 "filename": filename,
