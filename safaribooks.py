@@ -545,6 +545,10 @@ class SafariBooks:
             if response == 0:
                 self.display.exit("API: unable to retrieve book info.")
             self.api_version = 2
+            # v2 REST APIs require Bearer token auth in addition to session cookies
+            jwt = next((c.value for c in self.session.cookies if c.name == "orm-jwt"), "")
+            if jwt:
+                self.session.headers["Authorization"] = "Bearer " + jwt
 
         if response.status_code != 200:
             try:
@@ -639,19 +643,32 @@ class SafariBooks:
         filename = ourn.split(":")[-1] if ":" in ourn else ""
         if filename and filename not in seen:
             seen.add(filename)
-            content_url = "{}/api/v1/book/{}/chapter/{}".format(
+            content_url = "{}/api/v2/epubs/urn:orm:book:{}/files/{}".format(
                 SAFARI_BASE_URL, self.book_id, filename
             )
-            asset_base_url = "{}/api/v1/book/{}/chapter/".format(
+            asset_base_url = "{}/api/v2/epubs/urn:orm:book:{}/files".format(
                 SAFARI_BASE_URL, self.book_id
             )
+
+            # Fetch per-chapter metadata to get stylesheets and images
+            stylesheets = []
+            images = []
+            ch_meta_url = entry.get("url", "")
+            if ch_meta_url:
+                r = self.requests_provider(ch_meta_url, headers={"Accept": "application/json"})
+                if r != 0 and r.status_code == 200:
+                    assets = r.json().get("related_assets", {})
+                    stylesheets = [{"url": u} for u in assets.get("stylesheets", [])]
+                    # Store just the filename so asset_base_url + '/' + name works
+                    images = [u.split("/")[-1] for u in assets.get("images", [])]
+
             chapters.append({
                 "filename": filename,
                 "title": entry.get("title", filename),
                 "content": content_url,
                 "asset_base_url": asset_base_url,
-                "images": [],
-                "stylesheets": [],
+                "images": images,
+                "stylesheets": stylesheets,
                 "site_styles": [],
             })
         for child in entry.get("children", []):
